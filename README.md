@@ -18,9 +18,9 @@ pip3 install -r requirements.txt
 
 #### Install torch-geometric
 ```shell
-pip3 install torch-scatter -f https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_scatter-2.0.5-cp36-cp36m-linux_x86_64.whl
-pip3 install torch-sparse -f https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_sparse-0.6.7-cp36-cp36m-linux_x86_64.whl
-pip3 install torch-cluster -f https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_cluster-1.5.7-cp36-cp36m-linux_x86_64.whl
+pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_scatter-2.0.5-cp36-cp36m-linux_x86_64.whl
+pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_sparse-0.6.7-cp36-cp36m-linux_x86_64.whl
+pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_cluster-1.5.7-cp36-cp36m-linux_x86_64.whl
 pip3 install torch-geometric
 ```
 
@@ -126,6 +126,7 @@ We will constantly add new structures and platforms to the dataset.
     * [x] atlas300-acl-fp16 (NPU)
     * [x] mul270-neuware-int8 (NPU)
     * [ ] hexagonDSP-snpe-int8 (DSP)
+    * [ ] Xilinx-Ultra96-VitisAI-int8 (FPGA)
   * Onnx models (200 * 10)
     * ResNets
     * VGGs
@@ -144,6 +145,7 @@ We will constantly add new structures and platforms to the dataset.
     * 10597
 
 ## Experiments
+#### GNN Prediction Pipeline
 
 #### Unseen Structure
 We use a certain model type for test, and use other types for training. The user can specify the test model type by specifying the `TEST_MODEL_TYPE` in the script.
@@ -223,3 +225,101 @@ Then you can train your own latency predictor in two different ways:
 
 * Transfer from our pre-trained model (more suitable for a small count of latency samples)
   * refer the script `nnlqp/transfer_platform/transfer_train.sh`
+
+
+## Latency Measurement
+
+#### How to convert ONNX into hardware format
+To facilitate the latency measurement of multiple platforms, we developed a unified model deployment tool. Its pipeline is shown as below:
+
+![avatar](png/latency-measurement-pipeline.pdf)
+Given the ONNX, hardware, software, batch size, data type as input, the tool does:
+
+  1. Converts ONNX to our unified graph intermediate representation (graph IR), which describes operator attributes and operator connection relationships;
+
+  2. Does some common passes to transform and verify the graph IR, such as inferring shapes and folding constant;
+
+  3. According to the query software and hardware, does some platform-aware passes so that transformed graph IR conforms to the inference constraints. For example:
+
+      * For `data_type=int8`, it is necessary to do the quantization pass;
+      * For `software=openppl`, we need to call some operator-altering passes, such as transforming Add, Sub, Mul, and Div to Eltwise;
+      * For `software=trt7.1`, we need to call the operator fusion pass.
+      * In addition, we provide a large number of operators with the default CPU implementation. For some operators that are not supported by the platform, the tool will split the graph IR and make these operators run on the CPU. The strategy can make sure that most models can be deployed on multiple platforms smoothly;
+
+  4. Adopts platform-aware compilation tools to compile the graph IR into executable engines that can run on hardware.
+
+  5. The tool manages multiple hardware devices. It can acquire access to a specific device based on the latency measurement request, and upload the engine and inference environment to the target machine by the RPC. Then it does the model inference and return latency results.
+
+#### Device Setup
+Our latency measurement tool supports the following platforms, and the platform count is continuously growing.
+
+| type | hardware   | software | GFLOPS | GOPS |
+| :--: | :---------:| :------: | :----: | :--: |
+| GPU  | GTX-1660   | TensorRT-7.1|
+| CPU  | Intel      | OpenPPL  |
+| NPU  | Hi3559A    | NNIE11   |
+| GPU  | Tesla-T4   | TensorRT-7.1|
+| GPU  | Tesla-P4   | TensorRT-7.1|
+| NPU  | Hi3519     | NNIE12   |
+| NPU  | Atlas300   | ACL      |
+| NPU  | MUL270     | Neuware  |
+| *DSP | hexagonDSP | SNPE     |
+| *FPGA| Xilinx-Ultra96 | VitisAI|
+(* means to be supported soon)
+
+The latency measurement and query database are currently not open-sourced. Shortly, we will provide external services for everyone to use.
+
+
+## Extra Note
+
+#### User Case
+
+Let’s take the face unlock model for mobile phones as an example.  For developers of deep learning application algorithms on a mobile phone, they intend to run on multiple devices such as Apple and Samsung and so on. These mobile phones also have different chips, such as Apple A, Qualcomm Snapdragon, MTK. Even for Qualcomm chips, there are four different types ARM/GPU/DSP/NPU. If the inference latency of the face unlocking model is required to be within 0.1s, we need to design a model to meet the latency requirements and decide what kind of device can be used. The accurate and true latency feedback is essential for model design and deployment. Therefore, the developer can use our system to alleviate the cost of model latency acquisition from two aspects: latency query and latency prediction. More specifically, we have following cases which can help with machine learning model design and improvement.
+
+* NNLQ can free researchers from the tedious process of collecting the latency of DNN models from various hardware devices: While adapting to different hardware, we need to deploy models on different platforms and get true latency feedback.  For example, we can use TensorRT to get the latency feedback on NVIDIA GPU, while we cannot use TensorRT to transform model into hardware format for other hardware devices. Most hardware has different deploying format. Therefore, the proposed model latency query system NNLQ can perform automatic model deployment and latency measurement on multiple platforms. ONNX model and target platform are provided as query input, and NNLQ returns the realistic model latency on the target hardware through the three steps: model transformation, device acquisition and latency measurement.
+
+* In the model design, our model latency acquisition system can provide some **high-level decision**:
+
+  * Which operators are not suitable for ability: for example, hard swish is not supported on openppl. Therefore we should avoid using this operation.
+  * On the choice of backbone to achieve better latency-accuracy tradeoff: For example, RegNetX-200M ResNet18  have similar ImageNet accuracy which is 68.7 and 70.3, but the latency of RegNetX-200M is 150% of ResNet18 on P4 int8, therefore, we should choose ResNet18 compared with RegNetX-200M.
+  * In the choice of hardware for inference speedup: Given the same model-ResNet 18 + data type int8 + batch size 1, the latency on P4 is 2 times of the latency on T4. If these two devices are available, changing deployed device from P4 to T4 can bring 50% speedup. Besides, atlas300 is faster than mlu270 under the same setting.
+  * In the choice of data type for possible accuracy degradation: for the vision transformer models, the speed up brought by int8 compared with FP32 is less than 5%. To avoid the potential accuracy degradation, you can choose to fp32 data type directly.
+
+* In the network architecture search process, our model latency prediction can help to improve search cost and find models with higher task accuracy. If the current model is not able to be deployed on some required hardware, we need to redesign a model which is general across different platforms. Hardware-aware Network Architecture Search(NAS) is an effective method to improve the model performance. In hardware-aware NAS, models are selected with the help of hardware feedback, therefore, if the hardware feedback takes long time to be acquired, this could increase the search cost and hinder the use of hardware-aware NAS. 
+    
+  * NAS needs to test a large number of models, and true latency measurement is very slow. Our latency prediction is able to predict true model latency with 1000 times improved efficiency as shown in Table 2. 
+    
+  * Developers can further use the data from our evolving database to reduce the cost of latency predictor training. Because the prediction process brings a possible gap in the true latency and predicted latency. Improving the performance of the latency prediction allows us to simulate the true latency feedback as accurately as possible. The comparison of time cost is as follows in the table.
+
+|      | measurement| prediction| test models | time cost |
+| :--: | :---------:| :-------: | :----: | :--: |
+| measurement | 1k | 0 | 1k | (1m + 0) * T |
+| without transfer | 1k | 10k | 10k | (1m+10k) * T
+| with transfer | 50 | 10k | 10k | (50k+10k) * T |
+(k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
+
+If the training cost of the predictor is high, we may not achieve the purpose of improving efficiency, but if we use historical information with our evolving database, we can get the highly accurate latency predictor with less cost, while getting more model speed. 
+
+## Extend to a new type of architecture
+
+* Generate the required ONNX model, we can produce 2k to server as the training and validation samples for latency prediction with 1k for both sides. 
+* Using NNLQ to get the true speed of the model, we don’t need to convert to a hardware-specific format by ourselves, reducing the cost of speed measurement
+* In fact, we are able to predict latency with our pre-trained predictor if this hardware is already trained once. However, to improve accuracy, we also need to select some samples to finetune this predictor.
+* Select the samples required to train the latency predictor. With the help of historical latency information or trained hardware predictors, we are able to perform fast finetuning to obtain a high-precision latency predictor model. In our extension experiments with Vision Transformer, we find that only 50 samples are needed to get a high-precision speed predictor and are compared with the results of 1000 samples.
+
+|      | MAPE| RMSPE| ErrBound(0.1) | time cost |
+| :--: | :---------:| :-------: | :----: | :--: |
+|1000 samples without pretrain | 0.01022 | 0.01367 | 0.999 | (1m + 1k) * T |
+|50 samples with pretrain | 0.00977 | 0.01315 | 0.999 | (50k + 1k) * T |
+(k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
+
+## How does this help to NAS
+
+* From a theoretical analysis perspective, we have a much higher possibility for find models which meets the latency requirements.
+    
+  * Given the latency requirement of the model (e.g., 5ms), the improvement of the latency predictor acc can increase the probability of finding a model that meets the latency requirements. For example, with the true latency feedback, we are only able to test 1k models, but with the latency predictor, we are allowed to get the latency of 1w models. With the help of an accurate latency predictor, we guarantee that the prediction error is less than 10% for 95% of models. Therefore, we can get more models that meet the latency requirements, which will lead to an increased probability of finding a higher-precision model.
+    
+
+* With the help of an accurate latency predictor and accurate accuracy predictor, we are able to find models with higher task accuracy. 
+    
+  * In Section 8.7, we give an example that how does latency prediction helps find more accurate models compared with FLOPs, lookup table, predict latency and true latency. With more accurate latency feedback, we are able to produce models with 1.2% higher task accuracy.
