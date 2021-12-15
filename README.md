@@ -265,6 +265,7 @@ Our latency measurement tool supports the following platforms, and the platform 
 | NPU  | MUL270     | Neuware  |
 | *DSP | hexagonDSP | SNPE     |
 | *FPGA| Xilinx-Ultra96 | VitisAI|
+
 (* means to be supported soon)
 
 The latency measurement and query database are currently not open-sourced. Shortly, we will provide external services for everyone to use.
@@ -296,6 +297,7 @@ Let’s take the face unlock model for mobile phones as an example.  For develop
 | measurement | 1k | 0 | 1k | (1m + 0) * T |
 | without transfer | 1k | 10k | 10k | (1m+10k) * T
 | with transfer | 50 | 10k | 10k | (50k+10k) * T |
+
 (k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
 
 If the training cost of the predictor is high, we may not achieve the purpose of improving efficiency, but if we use historical information with our evolving database, we can get the highly accurate latency predictor with less cost, while getting more model speed. 
@@ -311,6 +313,7 @@ If the training cost of the predictor is high, we may not achieve the purpose of
 | :--: | :---------:| :-------: | :----: | :--: |
 |1000 samples without pretrain | 0.01022 | 0.01367 | 0.999 | (1m + 1k) * T |
 |50 samples with pretrain | 0.00977 | 0.01315 | 0.999 | (50k + 1k) * T |
+
 (k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
 
 ## How does this help to NAS
