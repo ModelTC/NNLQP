@@ -232,7 +232,7 @@ Then you can train your own latency predictor in two different ways:
 #### How to convert ONNX into hardware format
 To facilitate the latency measurement of multiple platforms, we developed a unified model deployment tool. Its pipeline is shown as below:
 
-![avatar](png/latency-measurement-pipeline.pdf)
+![avatar](png/latency-measurement-pipeline.png)
 Given the ONNX, hardware, software, batch size, data type as input, the tool does:
 
   1. Converts ONNX to our unified graph intermediate representation (graph IR), which describes operator attributes and operator connection relationships;
