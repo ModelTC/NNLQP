@@ -278,7 +278,7 @@ Our latency measurement tool supports the following platforms, and the platform 
 The latency measurement and query database are currently not open-sourced. Shortly, we will provide external services for everyone to use.
 
 
-## Why and how our NNLQP benefits the ML model production？
+## Why and how does our NNLQP benefit the ML model production？
 
 #### User Case
 
@@ -299,13 +299,13 @@ Let’s take the face unlock model for mobile phones as an example.  For develop
     
   * Developers can further use the data from our evolving database to reduce the cost of latency predictor training. Because the prediction process brings a possible gap in the true latency and predicted latency. Improving the performance of the latency prediction allows us to simulate the true latency feedback as accurately as possible. The comparison of time cost is as follows in the table.
 
-|      | measurement| prediction| test models | time cost |
-| :--: | :---------:| :-------: | :----: | :--: |
-| measurement | 1k | 0 | 1k | (1m + 0) * T |
-| without transfer | 1k | 10k | 10k | (1m+10k) * T
-| with transfer | 50 | 10k | 10k | (50k+10k) * T |
+    |      | measurement| prediction| test models | time cost |
+    | :--: | :---------:| :-------: | :----: | :--: |
+    | measurement | 1k | 0 | 1k | (1m + 0) * T |
+    | without transfer | 1k | 10k | 10k | (1m+10k) * T
+    | with transfer | 50 | 10k | 10k | (50k+10k) * T |
 
-(k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
+    (k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
 
 If the training cost of the predictor is high, we may not achieve the purpose of improving efficiency, but if we use historical information with our evolving database, we can get the highly accurate latency predictor with less cost, while getting more model speed. 
 
@@ -316,12 +316,12 @@ If the training cost of the predictor is high, we may not achieve the purpose of
 * In fact, we are able to predict latency with our pre-trained predictor if this hardware is already trained once. However, to improve accuracy, we also need to select some samples to finetune this predictor.
 * Select the samples required to train the latency predictor. With the help of historical latency information or trained hardware predictors, we are able to perform fast finetuning to obtain a high-precision latency predictor model. In our extension experiments with Vision Transformer, we find that only 50 samples are needed to get a high-precision speed predictor and are compared with the results of 1000 samples.
 
-|      | MAPE| RMSPE| ErrBound(0.1) | time cost |
-| :--: | :---------:| :-------: | :----: | :--: |
-|1000 samples without pretrain | 0.01022 | 0.01367 | 0.999 | (1m + 1k) * T |
-|50 samples with pretrain | 0.00977 | 0.01315 | 0.999 | (50k + 1k) * T |
+  |      | MAPE| RMSPE| ErrBound(0.1) | time cost |
+  | :--: | :---------:| :-------: | :----: | :--: |
+  |1000 samples without pretrain | 0.01022 | 0.01367 | 0.999 | (1m + 1k) * T |
+  |50 samples with pretrain | 0.00977 | 0.01315 | 0.999 | (50k + 1k) * T |
 
-(k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
+  (k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
 
 #### How does this help to NAS
 
