@@ -9,16 +9,26 @@ NNLQP: A Multi-Platform Neural Network Latency Query and Prediction System with 
   * `python 3.6.4`
 
 #### Install pytorch onnx networkx
-  * `pytorch==1.5.0`
-  * `onnx==1.7.0`
-  * `networkx==2.5.1`
 ```shell
-pip3 install -r requirements.txt
+pip3 install networkx==2.5.1
+pip3 install onnx==1.7.0
+pip3 install torch==1.5.0
 ```
 
 #### Install torch-geometric
-Please refer the [torch-geometric official documentation](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
 
+
+You should first specific CUDA version (`cpu`, `cu92`, `cu101`, `cu102`, `cu110`, `cu111`, `cu113`), and visit the page https://data.pyg.org/whl/torch-1.5.0+${CUDA}.html to look up for pre-built `torch-scatter` and `torch-sparse` packages.
+
+If `CUDA==cu102` (cuda-10.2), we can visit the page https://data.pyg.org/whl/torch-1.5.0+cu102.html, and found latest packages, and then install them by:
+
+```shell
+pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcu102/torch_scatter-2.0.5-cp36-cp36m-linux_x86_64.whl
+pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcu102/torch_sparse-0.6.7-cp36-cp36m-linux_x86_64.whl
+pip3 install torch-geometric
+```
+
+For more installation details, please refer [torch-geometric official documentation](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
 
 #### Run Demo
 Clone the repository
