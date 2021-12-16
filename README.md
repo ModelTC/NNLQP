@@ -260,25 +260,25 @@ Given the ONNX, hardware, software, batch size, data type as input, the tool doe
 #### Device Setup
 Our latency measurement tool supports the following platforms, and the platform count is continuously growing.
 
-| type | hardware   | software |manufacturer| GFLOPS | GOPS | power |
-| :--: | :---------:| :------: | :------: | :----: | :--: | :----:|
-| GPU  | GTX-1660   | TensorRT-7.1|Nvidia |
-| CPU  | Intel-Xeon-Gold-6246| OpenPPL  |Intel     |  |  | 165W|
-| NPU  | Hi3559A    | NNIE11   |Hisilicon |
-| GPU  | Tesla-T4   | TensorRT-7.1|Nvidia |
-| GPU  | Tesla-P4   | TensorRT-7.1|Nvidia |
-| NPU  | Hi3519     | NNIE12   |Hisilicon |
-| NPU  | Atlas300   | ACL      |Huawei    |
-| NPU  | MLU270     | Neuware  |Cambricon |
-| *DSP | hexagonDSP | SNPE     |Qualcomm  |
-| *FPGA| Xilinx-Ultra96|VitisAI|Xilinx |
+| type | hardware   | software |manufacturer| processing power | power |
+| :--: | :---------:| :------: | :------: | :----: | :----:|
+| GPU  | GTX-1660   | TensorRT-7.1|Nvidia | FP16: 8616 GFLOPS, FP32: 4308 GFLOPS, FP64: 135 GFLOPS | 120W
+| CPU  | Intel-Xeon-Gold-6246| OpenPPL  |Intel     | FP32: 211.2 GFLOPS, FP64: 105.6 GFLOPS (single core) | 165W|
+| NPU  | Hi3559AV100    | NNIE11   |Hisilicon | INT8: 4TOPS (2 NNIE cores) | 3W
+| GPU  | Tesla-T4   | TensorRT-7.1|Nvidia | INT4: 260 TOPS, INT8: 130 TOPS, FP16 / FP32 mix：65 TFLOPS, FP32: 8.1 TFLOPS | 70W
+| GPU  | Tesla-P4   | TensorRT-7.1|Nvidia | INT8: 22 TOPS, FP32: 5.5 TFLOPS | 50/75W
+| NPU  | Hi3519AV100     | NNIE12   |Hisilicon | INT8: 1.7 TOPS | 2.2W
+| NPU  | Atlas300   | ACL      |Huawei    | INT8: 22 TOPS, FP: 11 TFLOPS | 8W
+| NPU  | MLU270     | Neuware  |Cambricon | INT4: 256 TOPS, INT8: 128 TOPS, INT16: 64 TOPS | 70W
+| *DSP | HexagonDSP | SNPE     |Qualcomm  | INT8: 26 TOPS | 5W
+| *FPGA| Ultra96-V2|VitisAI|Xilinx | INT8: 675 TOPS | -
 
 (* means to be supported soon)
 
 The latency measurement and query database are currently not open-sourced. Shortly, we will provide external services for everyone to use.
 
 
-## Extra Note
+## Why and how our NNLQP benefits the ML model production？
 
 #### User Case
 
@@ -309,7 +309,7 @@ Let’s take the face unlock model for mobile phones as an example.  For develop
 
 If the training cost of the predictor is high, we may not achieve the purpose of improving efficiency, but if we use historical information with our evolving database, we can get the highly accurate latency predictor with less cost, while getting more model speed. 
 
-## Extend to a new type of architecture
+#### Extend to a new type of architecture
 
 * Generate the required ONNX model, we can produce 2k to server as the training and validation samples for latency prediction with 1k for both sides. 
 * Using NNLQ to get the true speed of the model, we don’t need to convert to a hardware-specific format by ourselves, reducing the cost of speed measurement
@@ -323,7 +323,7 @@ If the training cost of the predictor is high, we may not achieve the purpose of
 
 (k=1,000, m=1,000,000, T=once prediction cost, 1000T=once true latency test cost)
 
-## How does this help to NAS
+#### How does this help to NAS
 
 * From a theoretical analysis perspective, we have a much higher possibility for find models which meets the latency requirements.
     
