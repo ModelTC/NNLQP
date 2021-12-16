@@ -17,12 +17,8 @@ pip3 install -r requirements.txt
 ```
 
 #### Install torch-geometric
-```shell
-pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_scatter-2.0.5-cp36-cp36m-linux_x86_64.whl
-pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_sparse-0.6.7-cp36-cp36m-linux_x86_64.whl
-pip3 install https://data.pyg.org/whl/torch-1.5.0%2Bcpu/torch_cluster-1.5.7-cp36-cp36m-linux_x86_64.whl
-pip3 install torch-geometric
-```
+Please refer the [torch-geometric official documentation](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+
 
 #### Run Demo
 Clone the repository
@@ -32,7 +28,7 @@ git clone https://github.com/anonymousnnlqp/NNLQP.git
 
 Given an onnx model as input, the demo can predict model latencies on 9 platforms:
 ```shell
-cd nnlqp
+cd NNLQP
 python3 demo.py --onnx_file test_onnx/resnet18-v1-7-no-weight.onnx
 ```
 
@@ -55,7 +51,7 @@ Latency prediction for platform mul270-neuware-int8 : 18.250690460205078 ms
 
 #### Download
 ```shell
-cd nnlqp
+cd NNLQP
 mkdir dataset
 wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/dataset.tar.gz -O dataset.tar.gz
 tar -xzvf dataset.tar.gz -C dataset
@@ -107,7 +103,7 @@ We will constantly add new structures and platforms to the dataset.
     * [x] SqueezeNets
     * [x] GoogleNets
     * [x] NasBench201s
-    * [x] VisionTransformers
+    * [ ] VisionTransformers
   * Input sizes
     * `1 x 3 x 32 x 32` (only for NasBenc201s)
     * `1 x 3 x 224 x224`
@@ -146,6 +142,7 @@ We will constantly add new structures and platforms to the dataset.
 
 ## Experiments
 #### GNN Prediction Pipeline
+![avatar](png/latency-prediction-pipeline.png)
 
 #### Unseen Structure
 We use a certain model type for test, and use other types for training. The user can specify the test model type by specifying the `TEST_MODEL_TYPE` in the script.
@@ -153,7 +150,7 @@ We use a certain model type for test, and use other types for training. The user
 Before experiments, please make sure that you download the dataset, and the directory `nnlqp/dataset/unseen_structure/` are valid.
 
 ```shell
-cd nnlqp/experiments/unseen_structure/
+cd NNLQP/experiments/unseen_structure/
 ```
 
 * Get our pre-trained models and test
@@ -173,7 +170,7 @@ bash train.sh
 Before experiments, please make sure that you download the dataset, and the directory `nnlqp/dataset/multi_platform/` are valid.
 
 ```shell
-cd nnlqp/experiments/multi_platform/
+cd NNLQP/experiments/multi_platform/
 ```
 
 * Get our pre-trained models and test
@@ -197,7 +194,7 @@ If there are latency samples on 4 platforms A, B, C, D, we can first train a pre
 For example, the `multi platforms` dataset involved 9 platforms, we can train a pre-trained model on 8 platforms 2, 9, 12, 13, 14, 16, 18, 23, and then use a certain number of samples to train predictor of platform 10. Users can set `TRAIN_NUM` in `raw_train.sh` or `transfer_train.sh` to control the samples numbers. In this example, we use `32`, `100`, `200`, `300`, `-1 (all)`. `raw_train.sh` is for training a predictor without the pre-trained model and transfer learning, while `transfer_train.sh` uses the pre-trained model and transfer learning.
 
 ```shell
-cd nnlqp/experiments/transfer_platform/
+cd NNLQP/experiments/transfer_platform/
 ```
 
 * Users can test the results of trained predictors:
@@ -253,18 +250,18 @@ Given the ONNX, hardware, software, batch size, data type as input, the tool doe
 #### Device Setup
 Our latency measurement tool supports the following platforms, and the platform count is continuously growing.
 
-| type | hardware   | software | GFLOPS | GOPS |
-| :--: | :---------:| :------: | :----: | :--: |
-| GPU  | GTX-1660   | TensorRT-7.1|
-| CPU  | Intel      | OpenPPL  |
-| NPU  | Hi3559A    | NNIE11   |
-| GPU  | Tesla-T4   | TensorRT-7.1|
-| GPU  | Tesla-P4   | TensorRT-7.1|
-| NPU  | Hi3519     | NNIE12   |
-| NPU  | Atlas300   | ACL      |
-| NPU  | MUL270     | Neuware  |
-| *DSP | hexagonDSP | SNPE     |
-| *FPGA| Xilinx-Ultra96 | VitisAI|
+| type | hardware   | software |manufacturer| GFLOPS | GOPS | power |
+| :--: | :---------:| :------: | :------: | :----: | :--: | :----:|
+| GPU  | GTX-1660   | TensorRT-7.1|Nvidia |
+| CPU  | Intel-Xeon-Gold-6246| OpenPPL  |Intel     |  |  | 165W|
+| NPU  | Hi3559A    | NNIE11   |Hisilicon |
+| GPU  | Tesla-T4   | TensorRT-7.1|Nvidia |
+| GPU  | Tesla-P4   | TensorRT-7.1|Nvidia |
+| NPU  | Hi3519     | NNIE12   |Hisilicon |
+| NPU  | Atlas300   | ACL      |Huawei    |
+| NPU  | MLU270     | Neuware  |Cambricon |
+| *DSP | hexagonDSP | SNPE     |Qualcomm  |
+| *FPGA| Xilinx-Ultra96|VitisAI|Xilinx |
 
 (* means to be supported soon)
 
@@ -326,3 +323,6 @@ If the training cost of the predictor is high, we may not achieve the purpose of
 * With the help of an accurate latency predictor and accurate accuracy predictor, we are able to find models with higher task accuracy. 
     
   * In Section 8.7, we give an example that how does latency prediction helps find more accurate models compared with FLOPs, lookup table, predict latency and true latency. With more accurate latency feedback, we are able to produce models with 1.2% higher task accuracy.
+
+## License
+NNLQP is licensed under the [Apache-2.0](LICENSE) license.
