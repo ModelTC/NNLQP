@@ -65,6 +65,8 @@ cd NNLQP
 mkdir dataset
 wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/dataset.tar.gz -O dataset.tar.gz
 tar -xzvf dataset.tar.gz -C dataset
+wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/dataset2.tar.gz -O dataset2.tar.gz
+tar -xzvf dataset2.tar.gz -C dataset
 ```
 #### Format
 The latency dataset is saved to directory `nnlqp/dataset`:
@@ -75,11 +77,21 @@ The latency dataset is saved to directory `nnlqp/dataset`:
     │   └── onnx
     │       ├── ...
     │       ├── ...
-    └── unseen_structure
-        ├── gt.txt
-        └── onnx
-            ├── ...
-            ├── ...
+    ├── unseen_structure
+    |    ├── gt.txt
+    |    └── onnx
+    |        ├── ...
+    |        ├── ...
+    ├── fpga
+    |    ├── gt.txt
+    |    └── onnx
+    |        ├── ...
+    |        ├── ...
+    ├── vit
+    |    ├── gt.txt
+    |    └── onnx
+    |        ├── ...
+    |        ├── ...
 ```
 
 `onnx` is the directory of onnx models, which are removed weights.
@@ -113,7 +125,7 @@ We will constantly add new structures and platforms to the dataset.
     * [x] SqueezeNets
     * [x] GoogleNets
     * [x] NasBench201s
-    * [ ] VisionTransformers
+    * [x] VisionTransformers (inside `dataset2.tar.gz`)
   * Input sizes
     * `1 x 3 x 32 x 32` (only for NasBenc201s)
     * `1 x 3 x 224 x224`
@@ -132,7 +144,7 @@ We will constantly add new structures and platforms to the dataset.
     * [x] atlas300-acl-fp16 (NPU)
     * [x] mul270-neuware-int8 (NPU)
     * [ ] hexagonDSP-snpe-int8 (DSP)
-    * [ ] Xilinx-Ultra96-VitisAI-int8 (FPGA)
+    * [x] Xilinx-Ultra96-VitisAI-int8 (FPGA) (inside `dataset2.tar.gz`, see [FPGA readme](FPGA.md))
   * Onnx models (200 * 10)
     * ResNets
     * VGGs
@@ -271,7 +283,7 @@ Our latency measurement tool supports the following platforms, and the platform 
 | NPU  | Atlas300   | ACL      |Huawei    | INT8: 22 TOPS, FP: 11 TFLOPS | 8W
 | NPU  | MLU270     | Neuware  |Cambricon | INT4: 256 TOPS, INT8: 128 TOPS, INT16: 64 TOPS | 70W
 | *DSP | HexagonDSP | SNPE     |Qualcomm  | INT8: 26 TOPS | 5W
-| *FPGA| Ultra96-V2|VitisAI|Xilinx | INT8: 675 TOPS | -
+| FPGA| Ultra96-V2|VitisAI|Xilinx | INT8: 675 TOPS | -
 
 (* means to be supported soon)
 
