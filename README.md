@@ -33,7 +33,7 @@ For more installation details, please refer [torch-geometric official documentat
 #### Run Demo
 Clone the repository
 ```shell
-git clone https://github.com/anonymousnnlqp/NNLQP.git
+git clone https://github.com/ModelTC/NNLQP.git
 ```
 
 Given an onnx model as input, the demo can predict model latencies on 9 platforms:
@@ -63,9 +63,9 @@ Latency prediction for platform mul270-neuware-int8 : 18.250690460205078 ms
 ```shell
 cd NNLQP
 mkdir dataset
-wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/dataset.tar.gz -O dataset.tar.gz
+wget https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/dataset.tar.gz -O dataset.tar.gz
 tar -xzvf dataset.tar.gz -C dataset
-wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/dataset2.tar.gz -O dataset2.tar.gz
+wget https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/dataset2.tar.gz -O dataset2.tar.gz
 tar -xzvf dataset2.tar.gz -C dataset
 ```
 #### Format
@@ -177,7 +177,7 @@ cd NNLQP/experiments/unseen_structure/
 
 * Get our pre-trained models and test
 ```shell
-wegt https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/unseen_structure_ckpt.tar.gz -O unseen_structure_ckpt.tar.gz
+wegt https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/unseen_structure_ckpt.tar.gz -O unseen_structure_ckpt.tar.gz
 tar -xzvf unseen_structure_ckpt.tar.gz
 bash test.sh
 ```
@@ -197,7 +197,7 @@ cd NNLQP/experiments/multi_platform/
 
 * Get our pre-trained models and test
 ```shell
-wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/multi_platform_ckpt.tar.gz -O multi_platform_ckpt.tar.gz
+wget https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/multi_platform_ckpt.tar.gz -O multi_platform_ckpt.tar.gz
 tar -xzvf multi_platform_ckpt.tar.gz
 bash test.sh
 ```
@@ -221,7 +221,7 @@ cd NNLQP/experiments/transfer_platform/
 
 * Users can test the results of trained predictors:
 ```shell
-wget https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/transfer_platform_ckpt.tar.gz -O transfer_platform_ckpt.tar.gz
+wget https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/transfer_platform_ckpt.tar.gz -O transfer_platform_ckpt.tar.gz
 tar -xzvf transfer_platform_ckpt.tar.gz
 bash raw_test.sh
 bash transfer_test.sh

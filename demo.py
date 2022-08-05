@@ -59,7 +59,7 @@ class Demo(object):
         # download ckpt from the Internet
         if not os.path.exists(args.resume):
             fname = os.path.join(ckpt_dir, "multi_platform_ckpt.tar.gz")
-            download_file("https://github.com/anonymousnnlqp/NNLQP/releases/download/v1.0-data/multi_platform_ckpt.tar.gz", fname)
+            download_file("https://github.com/ModelTC/NNLQP/releases/download/v1.0-data/multi_platform_ckpt.tar.gz", fname)
             os.system("tar -xzvf {} -C ./experiments/multi_platform/".format(fname))
         return args
 
